@@ -3,13 +3,9 @@
 import { Tweet } from "@/types";
 import { useEffect, useRef } from "react";
 
-const PASTEL_COLORS = [
-  "#DCFBC7", // lime
-  "#CEF3FD", // cyan
-  "#DFEDFD", // peri
-  "#FEF6D0", // lemon
-  "#EFE7FD", // lavender
-  "#FDDADA", // blush
+const CARD_TINTS = [
+  "rgba(230, 245, 240, 0.6)", // mint
+  "rgba(230, 240, 250, 0.6)", // sky
 ];
 
 interface TweetCardProps {
@@ -66,7 +62,7 @@ function getTweetIdFromUrl(url: string): string | null {
 
 export default function TweetCard({ tweet, onRemove, showRemove, colorIndex = 0 }: TweetCardProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const bgColor = PASTEL_COLORS[colorIndex % PASTEL_COLORS.length];
+  const bgColor = CARD_TINTS[colorIndex % CARD_TINTS.length];
 
   useEffect(() => {
     if (!wrapperRef.current) return;
@@ -74,7 +70,6 @@ export default function TweetCard({ tweet, onRemove, showRemove, colorIndex = 0 
     const tweetId = getTweetIdFromUrl(tweet.tweet_url);
     if (!tweetId) return;
 
-    // Create a standalone div outside React's control
     const widgetContainer = document.createElement("div");
     wrapperRef.current.appendChild(widgetContainer);
 
@@ -96,21 +91,24 @@ export default function TweetCard({ tweet, onRemove, showRemove, colorIndex = 0 
 
   return (
     <div
-      className="relative group rounded-[24px] overflow-hidden h-[420px]"
+      className="relative group rounded-[20px] overflow-hidden h-[360px] sm:h-[400px] lg:h-[420px] backdrop-blur-[24px] border border-white/90 shadow-[0_24px_48px_rgba(42,40,38,0.04),0_8px_16px_rgba(42,40,38,0.02)] hover:-translate-y-1 transition-transform duration-300"
       style={{ backgroundColor: bgColor }}
     >
       {showRemove && onRemove && (
         <button
           onClick={onRemove}
-          className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 text-red-500 hover:bg-white rounded-full w-7 h-7 flex items-center justify-center text-sm"
+          className="absolute bottom-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity text-[var(--text-muted)] hover:text-red-500"
           title="Remove from collection"
         >
-          &times;
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
         </button>
       )}
       <div
         ref={wrapperRef}
-        className="h-full overflow-y-auto flex items-start justify-center p-4 [&_twitter-widget]:!m-0"
+        className="h-full overflow-y-auto flex items-start justify-center p-3 sm:p-4 [&_twitter-widget]:!m-0 [&_twitter-widget]:!max-w-none [&_twitter-widget]:scale-[1.1] sm:[&_twitter-widget]:scale-[1.2] [&_twitter-widget]:origin-top"
       />
     </div>
   );

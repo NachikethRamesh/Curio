@@ -27,12 +27,12 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push("/dashboard");
+      router.replace("/dashboard");
     }
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center px-5">
       <Link href="/" className="text-xl font-bold tracking-tight mb-10">
         Curio
       </Link>

@@ -26,7 +26,6 @@ export default function DashboardPage() {
   }, []);
 
   async function loadData() {
-    // getSession() refreshes expired tokens using the refresh token
     await supabase.auth.getSession();
     const {
       data: { user },
@@ -37,7 +36,6 @@ export default function DashboardPage() {
       return;
     }
 
-    // Get profile, create if missing (handles failed signup edge case)
     let { data: profile } = await supabase
       .from("profiles")
       .select("username")
@@ -60,7 +58,6 @@ export default function DashboardPage() {
 
     if (profile) setUsername(profile.username);
 
-    // Get collections with tweet counts
     const { data: cols } = await supabase
       .from("collections")
       .select("*, collection_tweets(count)")
@@ -119,19 +116,23 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-[var(--text-light)]">Loading...</p>
+        <p className="text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Top bar */}
-      <nav className="flex items-center justify-between px-6 sm:px-10 py-5">
-        <Link href="/" className="text-xl font-bold tracking-tight">
-          Curio
+    <div className="min-h-screen">
+      {/* Nav */}
+      <nav className="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[90%] max-w-[1200px] z-50 flex items-center justify-between px-4 sm:px-6 py-2.5 rounded-full border border-white/90 bg-white/70 backdrop-blur-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.03)]">
+        <Link
+          href="/"
+          className="text-[1.2rem] sm:text-[1.4rem] font-medium italic tracking-[-0.02em]"
+          style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
+        >
+          Curio.
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {username && (
             <>
               <ShareButton
@@ -140,7 +141,7 @@ export default function DashboardPage() {
               />
               <Link
                 href={`/${username}`}
-                className="text-sm text-[var(--text-muted)] hover:text-black transition-colors"
+                className="text-[0.8rem] sm:text-[0.85rem] font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors hidden sm:block"
                 target="_blank"
               >
                 View profile
@@ -149,29 +150,44 @@ export default function DashboardPage() {
           )}
           <button
             onClick={handleLogout}
-            className="text-sm text-[var(--text-muted)] hover:text-red-500 transition-colors"
+            className="text-[0.85rem] font-medium text-[var(--text-muted)] hover:text-red-500 transition-colors"
           >
             Log out
           </button>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 py-8">
-        <div className="flex items-center justify-between mb-10">
-          <h1 className="text-3xl sm:text-4xl font-normal tracking-tight uppercase">Your Collections</h1>
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-10 pt-[100px] sm:pt-[140px] pb-20">
+        {/* Header */}
+        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-[40px] sm:mb-[60px]">
+          <div>
+            <span className="uppercase tracking-[0.1em] text-xs font-semibold text-[var(--text-muted)] mb-2 block">
+              Dashboard
+            </span>
+            <h1
+              className="text-3xl sm:text-4xl lg:text-5xl font-medium italic tracking-[-0.02em] uppercase leading-none"
+              style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
+            >
+              Your Collections
+            </h1>
+          </div>
           <button
             onClick={() => setShowCreate(!showCreate)}
-            className="px-5 py-2.5 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center justify-center px-5 sm:px-7 py-3 sm:py-3.5 rounded-full text-[0.85rem] sm:text-[0.95rem] font-semibold bg-[var(--text-main)] text-white shadow-[0_8px_16px_rgba(42,40,38,0.1)] hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(42,40,38,0.15)] transition-all"
           >
-            + New Collection
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="mr-2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            New Collection
           </button>
-        </div>
+        </header>
 
         {/* Create form */}
         {showCreate && (
           <form
             onSubmit={createCollection}
-            className="bg-[#F4F4F5] rounded-[24px] p-8 mb-8"
+            className="bg-white rounded-[24px] p-8 mb-10 border border-black/[0.03] shadow-[var(--shadow-soft)]"
           >
             <div className="flex gap-3 mb-3">
               <input
@@ -180,7 +196,7 @@ export default function DashboardPage() {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 required
-                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/20 bg-white"
+                className="flex-1 px-4 py-3 border border-black/10 rounded-[12px] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 bg-[var(--bg-base)]"
               />
             </div>
             <input
@@ -188,19 +204,19 @@ export default function DashboardPage() {
               placeholder="Description (optional)"
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-black/20 bg-white"
+              className="w-full px-4 py-3 border border-black/10 rounded-[12px] text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-black/10 bg-[var(--bg-base)]"
             />
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
                 onClick={() => setShowCreate(false)}
-                className="px-5 py-2.5 text-sm text-[var(--text-muted)] hover:text-black transition-colors"
+                className="px-5 py-2.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
+                className="px-6 py-2.5 bg-[var(--text-main)] text-white rounded-full text-sm font-semibold shadow-[0_8px_16px_rgba(42,40,38,0.1)] hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(42,40,38,0.15)] transition-all"
               >
                 Create
               </button>
@@ -210,15 +226,15 @@ export default function DashboardPage() {
 
         {/* Collections grid */}
         {collections.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="py-20 px-10 text-center border-2 border-dashed border-black/[0.08] rounded-[24px] bg-white/20">
             <p className="text-4xl mb-4">{"\u{1F4C2}"}</p>
             <p className="text-[var(--text-muted)] mb-2">No collections yet</p>
-            <p className="text-sm text-[var(--text-light)]">
+            <p className="text-sm text-[var(--text-muted)]">
               Create your first collection to start curating your best tweets
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
             {collections.map((col, index) => (
               <CollectionCard
                 key={col.id}
@@ -229,6 +245,23 @@ export default function DashboardPage() {
                 index={index}
               />
             ))}
+            {/* Add collection card */}
+            <button
+              onClick={() => setShowCreate(true)}
+              className="border-2 border-dashed border-black/[0.05] rounded-[24px] min-h-[240px] flex items-center justify-center bg-transparent hover:border-black/10 transition-colors cursor-pointer"
+            >
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mx-auto mb-4 shadow-[0_4px_12px_rgba(0,0,0,0.05)]">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </div>
+                <span className="uppercase tracking-[0.1em] text-xs font-semibold text-[var(--text-muted)]">
+                  Add Collection
+                </span>
+              </div>
+            </button>
           </div>
         )}
       </div>

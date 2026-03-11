@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Collection, Tweet } from "@/types";
 import { generateSlug } from "@/lib/utils";
@@ -9,6 +9,56 @@ import ShareButton from "@/components/ShareButton";
 import CollectionDropdown from "@/components/CollectionDropdown";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+function SortableTweetCard({
+  tweet,
+  index,
+  onRemove,
+}: {
+  tweet: Tweet;
+  index: number;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: tweet.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative">
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-0 left-0 right-0 z-20 h-10 flex items-center justify-center cursor-grab active:cursor-grabbing rounded-t-[20px] bg-black/0 hover:bg-black/[0.03] transition-colors"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d1c9c4]">
+          <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
+          <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+          <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
+        </svg>
+      </div>
+      <TweetCard tweet={tweet} showRemove onRemove={onRemove} colorIndex={index} />
+    </div>
+  );
+}
 
 export default function CollectionEditorPage() {
   const params = useParams();
@@ -29,12 +79,9 @@ export default function CollectionEditorPage() {
   const [username, setUsername] = useState<string | null>(null);
   const [allCollections, setAllCollections] = useState<{ id: string; name: string; emoji: string | null }[]>([]);
 
-  // Drag and drop state
-  const dragItem = useRef<number | null>(null);
-  const dragOverItem = useRef<number | null>(null);
-  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const tweetsRef = useRef(tweets);
-  tweetsRef.current = tweets;
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
   useEffect(() => {
     loadCollection();
@@ -42,7 +89,6 @@ export default function CollectionEditorPage() {
   }, [collectionId]);
 
   async function loadCollection() {
-    // getSession() refreshes expired tokens using the refresh token
     await supabase.auth.getSession();
     const {
       data: { user },
@@ -64,7 +110,6 @@ export default function CollectionEditorPage() {
       return;
     }
 
-    // Fetch username for share link
     const { data: profile } = await supabase
       .from("profiles")
       .select("username")
@@ -72,7 +117,6 @@ export default function CollectionEditorPage() {
       .single();
     if (profile) setUsername(profile.username);
 
-    // Fetch all collections for the dropdown switcher
     const { data: cols } = await supabase
       .from("collections")
       .select("id, name, emoji")
@@ -85,7 +129,6 @@ export default function CollectionEditorPage() {
     setEditDescription(col.description || "");
     setEditEmoji(col.emoji || "");
 
-    // Get tweets in this collection
     const { data: links } = await supabase
       .from("collection_tweets")
       .select("tweet_id, position")
@@ -100,7 +143,6 @@ export default function CollectionEditorPage() {
         .in("id", tweetIds);
 
       if (tweetData) {
-        // Sort by the position from collection_tweets
         const ordered = links
           .map((l) => tweetData.find((t) => t.id === l.tweet_id))
           .filter(Boolean) as Tweet[];
@@ -161,47 +203,36 @@ export default function CollectionEditorPage() {
     loadCollection();
   }
 
-  // Drag and drop handlers
-  const handleDragStart = useCallback((index: number) => {
-    dragItem.current = index;
-    setDraggingIndex(index);
-  }, []);
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
 
-  const handleDragEnter = useCallback((index: number) => {
-    dragOverItem.current = index;
-    if (dragItem.current === null || dragItem.current === index) return;
+      const oldIndex = tweets.findIndex((t) => t.id === active.id);
+      const newIndex = tweets.findIndex((t) => t.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
 
-    setTweets((prev) => {
-      const updated = [...prev];
-      const draggedItem = updated[dragItem.current!];
-      updated.splice(dragItem.current!, 1);
-      updated.splice(index, 0, draggedItem);
-      dragItem.current = index;
-      return updated;
-    });
-  }, []);
+      const reordered = [...tweets];
+      const [moved] = reordered.splice(oldIndex, 1);
+      reordered.splice(newIndex, 0, moved);
+      setTweets(reordered);
 
-  const handleDragEnd = useCallback(async () => {
-    setDraggingIndex(null);
-    dragItem.current = null;
-    dragOverItem.current = null;
-
-    // Persist new positions to DB — use ref to get latest order
-    const currentTweets = tweetsRef.current;
-    const updates = currentTweets.map((tweet, index) =>
-      supabase
-        .from("collection_tweets")
-        .update({ position: index })
-        .eq("collection_id", collectionId)
-        .eq("tweet_id", tweet.id)
-    );
-    await Promise.all(updates);
-  }, [collectionId, supabase]);
+      const updates = reordered.map((tweet, index) =>
+        supabase
+          .from("collection_tweets")
+          .update({ position: index })
+          .eq("collection_id", collectionId)
+          .eq("tweet_id", tweet.id)
+      );
+      await Promise.all(updates);
+    },
+    [tweets, collectionId, supabase]
+  );
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-400">Loading...</p>
+        <p className="text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
@@ -209,13 +240,17 @@ export default function CollectionEditorPage() {
   if (!collection) return null;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Top bar */}
-      <nav className="flex items-center justify-between px-6 sm:px-10 py-5">
-        <Link href="/" className="text-xl font-bold tracking-tight">
-          Curio
-        </Link>
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen pb-24">
+      {/* Nav */}
+      <nav className="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[90%] max-w-[1200px] z-50 flex items-center justify-between px-4 sm:px-6 py-2.5 rounded-full border border-white/90 bg-white/60 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center gap-3 sm:gap-6">
+          <Link
+            href="/"
+            className="text-[1.2rem] sm:text-[1.4rem] font-medium italic tracking-[-0.02em]"
+            style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
+          >
+            Curio.
+          </Link>
           {allCollections.length > 0 && (
             <CollectionDropdown
               collections={allCollections}
@@ -224,138 +259,156 @@ export default function CollectionEditorPage() {
               hrefPattern="dashboard"
             />
           )}
+        </div>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Link
+            href="/dashboard"
+            className="text-[0.8rem] sm:text-[0.9rem] font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors hidden sm:block"
+          >
+            Back to collections
+          </Link>
+          <Link
+            href="/dashboard"
+            className="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors sm:hidden"
+            title="Back"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+          </Link>
           {username && collection && (
             <ShareButton
               url={`${typeof window !== "undefined" ? window.location.origin : ""}/${username}/${collection.slug || collection.id}`}
               text={`Check out my "${collection.name}" collection on Curio!`}
             />
           )}
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 bg-[#F4F4F5] px-4 py-2 rounded-full text-sm font-medium text-black hover:bg-[#E4E4E7] transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-            Back to collections
-          </Link>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 py-8">
-        {/* Collection header */}
-        {editing ? (
-          <div className="bg-[#F4F4F5] rounded-[24px] p-8 mb-8">
-            <div className="flex gap-3 mb-3">
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 pt-[100px] sm:pt-[160px]">
+        {/* Header */}
+        <header className="mb-12">
+          {editing ? (
+            <div className="bg-white rounded-[24px] p-8 border border-white/90 shadow-[var(--shadow-soft)]">
+              <div className="flex gap-3 mb-3">
+                <input
+                  type="text"
+                  value={editEmoji}
+                  onChange={(e) => setEditEmoji(e.target.value)}
+                  placeholder="Emoji"
+                  className="w-20 px-4 py-3 border border-black/10 rounded-[12px] text-sm text-center focus:outline-none focus:ring-2 focus:ring-black/10 bg-[var(--bg-base)]"
+                  maxLength={2}
+                />
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="flex-1 px-4 py-3 border border-black/10 rounded-[12px] text-sm focus:outline-none focus:ring-2 focus:ring-black/10 bg-[var(--bg-base)]"
+                />
+              </div>
               <input
                 type="text"
-                value={editEmoji}
-                onChange={(e) => setEditEmoji(e.target.value)}
-                placeholder="Emoji"
-                className="w-20 px-4 py-3 border border-gray-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-black/20 bg-white"
-                maxLength={2}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Description"
+                className="w-full px-4 py-3 border border-black/10 rounded-[12px] text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-black/10 bg-[var(--bg-base)]"
               />
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/20 bg-white"
-              />
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setEditing(false)}
+                  className="px-5 py-2.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveEdit}
+                  className="px-6 py-2.5 bg-[var(--text-main)] text-white rounded-full text-sm font-semibold shadow-[0_8px_16px_rgba(42,40,38,0.1)] hover:-translate-y-0.5 transition-all"
+                >
+                  Save
+                </button>
+              </div>
             </div>
-            <input
-              type="text"
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
-              placeholder="Description"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-black/20 bg-white"
-            />
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setEditing(false)}
-                className="px-5 py-2.5 text-sm text-[var(--text-muted)] hover:text-black transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveEdit}
-                className="px-5 py-2.5 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-start justify-between mb-8">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-normal tracking-tight uppercase flex items-center gap-3">
-                <span>{collection.emoji || "\u{1F4C1}"}</span>
-                {collection.name}
-              </h1>
+          ) : (
+            <>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-white rounded-[14px] flex items-center justify-center shadow-[var(--shadow-soft)] text-[var(--text-muted)]">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" /></svg>
+                </div>
+                <h1
+                  className="text-[2rem] sm:text-[3rem] lg:text-[3.5rem] italic font-normal tracking-[-0.02em] leading-none"
+                  style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
+                >
+                  {collection.name}
+                </h1>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="ml-auto text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                >
+                  Edit
+                </button>
+              </div>
               {collection.description && (
-                <p className="text-[var(--text-muted)] mt-2">{collection.description}</p>
+                <p className="text-[var(--text-muted)] mb-6">{collection.description}</p>
               )}
+            </>
+          )}
+
+          {/* Add tweet input bar */}
+          <form onSubmit={addTweet}>
+            <div className="flex items-center bg-white py-2 pl-4 sm:pl-6 pr-2 rounded-full border border-white/90 shadow-[var(--shadow-soft)] gap-2 sm:gap-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b8b4b0" strokeWidth="2" className="shrink-0 hidden sm:block">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              <input
+                type="url"
+                placeholder="Paste a tweet URL..."
+                value={tweetUrl}
+                onChange={(e) => setTweetUrl(e.target.value)}
+                required
+                className="flex-1 min-w-0 border-none outline-none text-sm sm:text-base bg-transparent placeholder:text-[#b8b4b0]"
+              />
+              <button
+                type="submit"
+                disabled={adding}
+                className="px-4 sm:px-5 py-2 bg-[var(--text-main)] text-white rounded-full text-[0.8rem] sm:text-[0.85rem] font-medium disabled:opacity-50 whitespace-nowrap transition-all hover:-translate-y-0.5"
+              >
+                {adding ? "Adding..." : "Add"}
+              </button>
             </div>
-            <button
-              onClick={() => setEditing(true)}
-              className="text-sm text-[var(--text-muted)] hover:text-black transition-colors"
-            >
-              Edit
-            </button>
-          </div>
-        )}
+            {addError && <p className="text-red-500 text-sm mt-3 pl-6">{addError}</p>}
+          </form>
+        </header>
 
-        {/* Add tweet form */}
-        <form onSubmit={addTweet} className="mb-8">
-          <div className="flex gap-3">
-            <input
-              type="url"
-              placeholder="Paste your tweet's URL here"
-              value={tweetUrl}
-              onChange={(e) => setTweetUrl(e.target.value)}
-              required
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
-            />
-            <button
-              type="submit"
-              disabled={adding}
-              className="px-6 py-3 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 disabled:opacity-50 whitespace-nowrap transition-colors"
-            >
-              {adding ? "Adding..." : "Add Tweet"}
-            </button>
-          </div>
-          {addError && <p className="text-red-500 text-sm mt-2">{addError}</p>}
-        </form>
-
-        {/* Tweets list */}
+        {/* Tweets grid */}
         {tweets.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="py-20 px-10 text-center border-2 border-dashed border-black/[0.08] rounded-[20px] bg-white/20">
             <p className="text-4xl mb-4">{"\u{1F4CC}"}</p>
             <p className="text-[var(--text-muted)] mb-2">No tweets yet</p>
-            <p className="text-sm text-[var(--text-light)]">
+            <p className="text-sm text-[var(--text-muted)]">
               Paste a tweet URL above to add your first tweet
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tweets.map((tweet, index) => (
-              <div
-                key={tweet.id}
-                draggable
-                onDragStart={() => handleDragStart(index)}
-                onDragEnter={() => handleDragEnter(index)}
-                onDragOver={(e) => e.preventDefault()}
-                onDragEnd={handleDragEnd}
-                className={`cursor-grab active:cursor-grabbing transition-opacity ${
-                  draggingIndex === index ? "opacity-50" : ""
-                }`}
-              >
-                <TweetCard
-                  tweet={tweet}
-                  showRemove
-                  onRemove={() => removeTweet(tweet.id)}
-                  colorIndex={index}
-                />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={tweets.map((t) => t.id)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tweets.map((tweet, index) => (
+                  <SortableTweetCard
+                    key={tweet.id}
+                    tweet={tweet}
+                    index={index}
+                    onRemove={() => removeTweet(tweet.id)}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
     </div>
