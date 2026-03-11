@@ -72,14 +72,18 @@ export default async function PublicProfilePage({ params }: Props) {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="px-6 sm:px-10 pt-10 pb-8">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 bg-[#F4F4F5] px-4 py-2 rounded-full text-sm font-medium text-black hover:bg-[#E4E4E7] transition-colors mb-8"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+      <nav className="flex items-center justify-between px-6 sm:px-10 py-5 w-full">
+        <Link href="/" className="text-xl font-bold tracking-tight hover:opacity-70 transition-opacity">
           Curio
         </Link>
+        <Link
+          href="/signup"
+          className="px-5 py-2.5 text-sm font-semibold bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+        >
+          Create yours free
+        </Link>
+      </nav>
+      <header className="px-6 sm:px-10 pt-4 pb-8">
         <div className="flex items-center gap-4 mb-2">
           <h1 className="text-4xl sm:text-5xl font-normal tracking-tight uppercase">
             {profile.display_name || profile.username}
@@ -137,10 +141,15 @@ export default async function PublicProfilePage({ params }: Props) {
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="text-center py-10 text-sm text-[var(--text-light)] font-medium uppercase tracking-wider">
-        <Link href="/" className="hover:text-black transition-colors">
-          Powered by Curio
+      {/* Footer CTA */}
+      <footer className="text-center py-12 px-6 border-t border-gray-100">
+        <p className="text-lg font-semibold mb-2">Your best tweets deserve more than a timeline</p>
+        <p className="text-sm text-[var(--text-muted)] mb-5">Curate, organize, and share your tweets — free with Curio.</p>
+        <Link
+          href="/signup"
+          className="inline-block px-6 py-3 text-sm font-semibold bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+        >
+          Get started for free
         </Link>
       </footer>
     </div>

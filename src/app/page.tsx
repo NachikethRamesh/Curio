@@ -90,9 +90,9 @@ export default function Home() {
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-[var(--text-muted)] max-w-2xl mb-10 leading-relaxed">
-            Stop letting the timeline bury your best work. Curio lets you curate
-            your tweets into topic-based collections and share them with a single
-            link.
+            Stop letting the timeline bury your best work. Reach the right audience.
+            <br />
+            Curio lets you curate your tweets into topic-based collections and share them with a single link.
           </p>
           <div className="flex gap-4 items-center">
             <Link
