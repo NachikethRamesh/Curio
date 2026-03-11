@@ -33,6 +33,8 @@ export default function CollectionEditorPage() {
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const tweetsRef = useRef(tweets);
+  tweetsRef.current = tweets;
 
   useEffect(() => {
     loadCollection();
@@ -184,8 +186,9 @@ export default function CollectionEditorPage() {
     dragItem.current = null;
     dragOverItem.current = null;
 
-    // Persist new positions to DB
-    const updates = tweets.map((tweet, index) =>
+    // Persist new positions to DB — use ref to get latest order
+    const currentTweets = tweetsRef.current;
+    const updates = currentTweets.map((tweet, index) =>
       supabase
         .from("collection_tweets")
         .update({ position: index })
@@ -193,7 +196,7 @@ export default function CollectionEditorPage() {
         .eq("tweet_id", tweet.id)
     );
     await Promise.all(updates);
-  }, [tweets, collectionId, supabase]);
+  }, [collectionId, supabase]);
 
   if (loading) {
     return (
