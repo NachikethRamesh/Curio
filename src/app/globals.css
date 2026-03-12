@@ -73,6 +73,6 @@ body::before {
 }
 
 @keyframes float-slow {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-15px); }
+  0% { translate: 0 0; }
+  100% { translate: 0 -15px; }
 }

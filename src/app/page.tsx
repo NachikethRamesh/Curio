@@ -59,7 +59,7 @@ export default function Home() {
 
       {/* Hero */}
       <div className="max-w-[1200px] mx-auto px-4 sm:px-[5%]">
-        <header className="pt-[100px] sm:pt-[120px] pb-[40px] sm:pb-[80px] min-h-[auto] lg:min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
+        <header className="pt-[100px] sm:pt-[140px] lg:pt-[180px] pb-[40px] sm:pb-[80px] lg:pb-[120px] min-h-[auto] lg:min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-[80px] items-center">
           <div className="relative z-[2] text-center lg:text-left">
             <span className="inline-block px-4 py-1.5 bg-[var(--accent-pill)] rounded-full text-[var(--text-muted)] font-medium text-[0.85rem] mb-6 uppercase tracking-[0.1em] text-xs font-semibold">
               Curation Tool
@@ -99,13 +99,18 @@ export default function Home() {
           {/* Hero visual - floating glass cards */}
           <div className="relative h-[600px] hidden lg:block" style={{ perspective: "1000px" }}>
             {/* Sub card 1 - top left */}
-            <div className="absolute w-[280px] h-[200px] top-[15%] left-[5%] z-[2] opacity-90 bg-white/75 backdrop-blur-[24px] border border-white/90 rounded-[32px] p-6 shadow-[var(--shadow-soft)] flex flex-col justify-center animate-[float-slow_7s_ease-in-out_infinite_alternate-reverse]"
-              style={{ transform: "rotate(-12deg)" }}>
+            <div
+              className="absolute w-[280px] h-[200px] top-[15%] left-[5%] z-[2] opacity-90 bg-white/75 backdrop-blur-[24px] border border-white/90 rounded-[32px] p-6 shadow-[var(--shadow-soft)] flex flex-col justify-center animate-[float-slow_7s_ease-in-out_infinite_alternate-reverse]"
+              style={{ transform: "rotate(-12deg)" }}
+            >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-full bg-[#e0dcd9]" />
+                <div
+                  className="w-9 h-9 rounded-full bg-[#e0dcd9] bg-cover shrink-0"
+                  style={{ backgroundImage: "url('https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop')" }}
+                />
                 <div>
                   <div className="h-2 w-20 bg-[#d4d0cd] rounded mb-1.5" />
-                  <div className="h-1.5 w-12 bg-[#e8e5e3] rounded" />
+                  <div className="h-1.5 w-[50px] bg-[#e8e5e3] rounded" />
                 </div>
               </div>
               <div className="h-2 w-[85%] bg-[#d4d0cd] rounded mb-2" />
@@ -114,22 +119,29 @@ export default function Home() {
             </div>
 
             {/* Sub card 2 - bottom right */}
-            <div className="absolute w-[260px] h-[320px] bottom-[10%] right-[5%] z-[1] opacity-85 bg-white/75 backdrop-blur-[24px] border border-white/90 rounded-[32px] p-6 shadow-[var(--shadow-soft)] animate-[float-slow_8s_ease-in-out_infinite_alternate]"
-              style={{ transform: "rotate(8deg)" }}>
-              <span className="absolute -top-5 right-5 bg-white px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-muted)] shadow-[0_4px_12px_rgba(0,0,0,0.04)] rotate-[5deg]">
+            <div
+              className="absolute w-[260px] h-[320px] bottom-[10%] right-[5%] z-[1] opacity-85 bg-white/75 backdrop-blur-[24px] border border-white/90 rounded-[32px] p-6 shadow-[var(--shadow-soft)] animate-[float-slow_8s_ease-in-out_infinite_alternate]"
+              style={{ transform: "rotate(8deg)" }}
+            >
+              <div className="absolute -top-5 right-5 bg-white px-4 py-2 rounded-full text-[0.8rem] font-semibold text-[var(--text-muted)] shadow-[0_4px_12px_rgba(0,0,0,0.04)] rotate-[5deg] z-10">
                 Design Notes
-              </span>
-              <div className="w-full h-[160px] bg-[#f0ebe6] rounded-xl mb-4" />
+              </div>
+              <div className="w-full h-[160px] bg-[#f0ebe6] rounded-xl my-4 overflow-hidden relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="https://images.pexels.com/photos/3153198/pexels-photo-3153198.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop" alt="" className="w-full h-full object-cover opacity-80" />
+              </div>
               <div className="h-2 w-[85%] bg-[#e8e5e3] rounded mb-2" />
               <div className="h-2 w-[70%] bg-[#e8e5e3] rounded" />
             </div>
 
             {/* Main card - center */}
-            <div className="absolute w-[340px] h-[420px] top-1/2 left-1/2 z-[3] bg-white/75 backdrop-blur-[24px] border border-white/90 rounded-[32px] p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-float)] animate-[float-slow_6s_ease-in-out_infinite_alternate] transition-[shadow] duration-500"
-              style={{ transform: "translate(-50%, -50%) rotate(-2deg)" }}>
-              <span className="absolute bottom-10 -left-5 bg-white px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-muted)] shadow-[0_4px_12px_rgba(0,0,0,0.04)] -rotate-[8deg]">
+            <div
+              className="absolute w-[340px] h-[420px] top-1/2 left-1/2 z-[3] bg-white/75 backdrop-blur-[24px] border border-white/90 rounded-[32px] p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-float)] animate-[float-slow_6s_ease-in-out_infinite_alternate] transition-[shadow] duration-500"
+              style={{ transform: "translate(-50%, -50%) rotate(-2deg)" }}
+            >
+              <div className="absolute bottom-10 -left-5 bg-white px-4 py-2 rounded-full text-[0.8rem] font-semibold text-[var(--text-muted)] shadow-[0_4px_12px_rgba(0,0,0,0.04)] -rotate-[8deg] z-10">
                 Collection
-              </span>
+              </div>
               <h3
                 className="text-2xl mb-2"
                 style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
@@ -142,11 +154,14 @@ export default function Home() {
 
               {/* Fake tweet 1 */}
               <div className="bg-white/50 rounded-2xl p-4 mb-3 border border-white/80">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-[#e0dcd9]" />
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="w-9 h-9 rounded-full bg-[#e0dcd9] bg-cover shrink-0"
+                    style={{ backgroundImage: "url('https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop')" }}
+                  />
                   <div>
                     <div className="h-2 w-20 bg-[#b8b4b0] rounded mb-1.5" />
-                    <div className="h-1.5 w-12 bg-[#e8e5e3] rounded" />
+                    <div className="h-1.5 w-[50px] bg-[#e8e5e3] rounded" />
                   </div>
                 </div>
                 <div className="h-2 w-[85%] bg-[#d4d0cd] rounded mb-2" />
@@ -155,11 +170,14 @@ export default function Home() {
 
               {/* Fake tweet 2 */}
               <div className="bg-white/50 rounded-2xl p-4 border border-white/80">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-[#e0dcd9]" />
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="w-9 h-9 rounded-full bg-[#e0dcd9] bg-cover shrink-0"
+                    style={{ backgroundImage: "url('https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop')" }}
+                  />
                   <div>
                     <div className="h-2 w-20 bg-[#b8b4b0] rounded mb-1.5" />
-                    <div className="h-1.5 w-12 bg-[#e8e5e3] rounded" />
+                    <div className="h-1.5 w-[50px] bg-[#e8e5e3] rounded" />
                   </div>
                 </div>
                 <div className="h-2 w-full bg-[#d4d0cd] rounded mb-2" />
@@ -196,7 +214,7 @@ export default function Home() {
             {STEPS.map((step, i) => (
               <div
                 key={step.number}
-                className={`flex-1 bg-white/75 backdrop-blur-[16px] border border-white/90 rounded-[var(--radius-md)] p-5 sm:p-8 shadow-[var(--shadow-soft)] relative z-[1] flex flex-col items-center text-center hover:scale-[1.02] transition-transform ${
+                className={`flex-1 bg-white/75 backdrop-blur-[16px] border border-white/90 rounded-[var(--radius-md)] p-5 sm:py-8 sm:px-6 shadow-[var(--shadow-soft)] relative z-[1] flex flex-col items-center text-center hover:scale-[1.02] transition-transform ${
                   i % 2 === 1 ? "sm:translate-y-10" : ""
                 }`}
               >
@@ -295,6 +313,7 @@ export default function Home() {
               The timeline is ephemeral, designed to wash away yesterday&apos;s genius.
               Curio acts as a serene, beautifully lit gallery for the ideas you want to stick around.
             </p>
+
           </div>
         </section>
 
@@ -308,7 +327,7 @@ export default function Home() {
               Start curating today.
             </h2>
             <p className="text-[1rem] sm:text-[1.2rem] text-[var(--text-muted)] mb-8 sm:mb-10">
-              Join thousands of writers, designers, and thinkers on X, broadcasting their best work to their audience.
+              Join thousands of writers, designers, and thinkers preserving their best work.
             </p>
             <Link
               href="/signup"
