@@ -9,6 +9,7 @@ import ShareButton from "@/components/ShareButton";
 import CollectionDropdown from "@/components/CollectionDropdown";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import Footer from "@/components/Footer";
 import {
   DndContext,
   closestCenter,
@@ -242,14 +243,16 @@ export default function CollectionEditorPage() {
   return (
     <div className="min-h-screen pb-24">
       {/* Nav */}
-      <nav className="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[90%] max-w-[1200px] z-50 flex items-center justify-between px-4 sm:px-6 py-2.5 rounded-full border border-white/90 bg-white/60 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.03)]">
+      <nav className="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[90%] max-w-[1200px] z-50 flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 rounded-full border border-white/90 bg-white/70 backdrop-blur-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.03)]">
         <div className="flex items-center gap-3 sm:gap-6">
-          <Link
-            href="/"
-            className="text-[1.2rem] sm:text-[1.4rem] font-medium italic tracking-[-0.02em]"
-            style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
-          >
-            Curio.
+          <Link href="/" className="flex items-center gap-1.5">
+            <img src="/logo-sm.png" alt="" className="w-14 h-14 object-contain" />
+            <span
+              className="text-[1.2rem] sm:text-[1.4rem] font-medium italic tracking-[-0.02em]"
+              style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
+            >
+              Curio.
+            </span>
           </Link>
           {allCollections.length > 0 && (
             <CollectionDropdown
@@ -411,6 +414,7 @@ export default function CollectionEditorPage() {
           </DndContext>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

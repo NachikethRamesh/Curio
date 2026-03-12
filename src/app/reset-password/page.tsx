@@ -78,9 +78,17 @@ export default function ResetPasswordPage() {
   if (sessionError) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-5">
-        <Link href="/" className="text-xl font-bold tracking-tight mb-10">
-          Curio
-        </Link>
+        <nav className="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[90%] max-w-[1200px] z-50 flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 rounded-full border border-white/90 bg-white/70 backdrop-blur-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.03)]">
+          <Link href="/" className="flex items-center gap-1.5">
+            <img src="/logo-sm.png" alt="" className="w-14 h-14 object-contain" />
+            <span
+              className="text-[1.2rem] sm:text-[1.4rem] font-medium italic tracking-[-0.02em]"
+              style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
+            >
+              Curio.
+            </span>
+          </Link>
+        </nav>
         <div className="w-full max-w-sm text-center">
           <h1 className="text-3xl font-semibold mb-4 tracking-tight">Invalid or expired link</h1>
           <p className="text-sm text-[var(--text-muted)] mb-8">

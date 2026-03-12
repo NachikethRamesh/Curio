@@ -24,6 +24,10 @@ export const metadata: Metadata = {
   title: "Curio - Organize your best tweets by topic",
   description:
     "Curio is like Linktree but for your X tweets. Create topic-based collections and share a single link to your best content.",
+  icons: {
+    icon: "/logo-sm.png",
+    apple: "/logo-md.png",
+  },
 };
 
 export default function RootLayout({

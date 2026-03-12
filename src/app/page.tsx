@@ -1,11 +1,12 @@
 import Link from "next/link";
 import LandingNav from "@/components/LandingNav";
+import Footer from "@/components/Footer";
 
 const STEPS = [
   {
     number: "01",
     title: "Claim your handle",
-    desc: "Sign up with your X handle. It becomes your Curio username and profile URL.",
+    desc: "Sign up with your X handle. It becomes your public Curio profile.",
   },
   {
     number: "02",
@@ -61,31 +62,34 @@ export default function Home() {
       <div className="max-w-[1200px] mx-auto px-4 sm:px-[5%]">
         <header className="pt-[100px] sm:pt-[140px] lg:pt-[180px] pb-[40px] sm:pb-[80px] lg:pb-[120px] min-h-[auto] lg:min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-[80px] items-center">
           <div className="relative z-[2] text-center lg:text-left">
-            <span className="inline-block px-4 py-1.5 bg-[var(--accent-pill)] rounded-full text-[var(--text-muted)] font-medium text-[0.85rem] mb-6 uppercase tracking-[0.1em] text-xs font-semibold">
-              Curation Tool
-            </span>
+            <div className="inline-flex items-center gap-1.5 mb-6">
+              <img src="/logo-sm.png" alt="" className="w-14 h-14 object-contain" />
+              <span
+                className="text-[1.2rem] sm:text-[1.4rem] font-medium italic tracking-[-0.02em]"
+                style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
+              >
+                Curio.
+              </span>
+            </div>
             <h1
-              className="text-[2.5rem] sm:text-[3.5rem] lg:text-[4.5rem] leading-[1.05] tracking-[-0.02em] mb-6 sm:mb-8"
+              className="text-[2rem] sm:text-[3rem] lg:text-[3.5rem] leading-[1.1] tracking-[-0.02em] mb-6 sm:mb-8 italic"
               style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
             >
-              <span className="block font-semibold text-[1.2rem] sm:text-[1.5rem] lg:text-[2rem] uppercase tracking-[0.05em] text-[var(--text-muted)] mb-2" style={{ fontFamily: "var(--font-sans), 'DM Sans', sans-serif" }}>
-                Your best tweets,
-              </span>
-              <span className="italic bg-gradient-to-br from-[#2A2826] to-[#6b645e] bg-clip-text text-transparent">
-                Organized by topic
+              <span className="bg-gradient-to-br from-[#2A2826] to-[#6b645e] bg-clip-text text-transparent">
+                Turn your best X posts into a portfolio people can actually browse.
               </span>
             </h1>
             <p className="text-[1rem] sm:text-[1.2rem] text-[var(--text-muted)] mb-8 sm:mb-12 max-w-[480px] leading-[1.6] mx-auto lg:mx-0">
-              Stop letting the timeline bury your best work. Reach the right audience.
-              <br />
+              Stop letting the timeline bury your best work. Let&apos;s make sure your best tweets reach your audience.
+              <br /><br />
               Curio lets you curate your tweets into topic-based collections and share them with a single link.
             </p>
             <div className="flex gap-4 items-center justify-center lg:justify-start">
               <Link
-                href="/signup"
+                href="/try"
                 className="inline-flex items-center justify-center px-7 py-3 rounded-full text-[0.95rem] font-medium bg-[var(--text-main)] text-white shadow-[0_8px_16px_rgba(42,40,38,0.15)] hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(42,40,38,0.2)] hover:bg-[#1a1918] transition-all"
               >
-                Get started &mdash; it&apos;s free
+                Try it now!
               </Link>
               <a
                 href="#how-it-works"
@@ -233,6 +237,76 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Why not just use X? */}
+        <section id="why-curio" className="py-[60px] sm:py-[120px]">
+          <div className="text-center mb-10 sm:mb-16">
+            <span className="uppercase tracking-[0.1em] text-xs font-semibold text-[var(--text-muted)]">
+              The Difference
+            </span>
+            <h2
+              className="text-3xl sm:text-4xl lg:text-5xl tracking-[-0.02em] mt-4"
+              style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
+            >
+              Why not just use X?
+            </h2>
+            <p className="text-[1rem] sm:text-[1.1rem] text-[var(--text-muted)] mt-4 sm:mt-6 max-w-[600px] mx-auto leading-[1.6]">
+              Posting is not the same as showcasing. Curio helps you organize your best tweets into a public, evergreen profile people can actually browse.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4 max-w-[800px] mx-auto">
+            {/* Pinned post */}
+            <div className="bg-white/75 backdrop-blur-[16px] border border-white/90 rounded-[var(--radius-md)] p-5 sm:p-7 shadow-[var(--shadow-soft)] flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+              <div className="sm:min-w-[160px]">
+                <h3 className="text-[1.1rem] font-semibold text-[var(--text-main)]">Pinned post</h3>
+              </div>
+              <div className="flex-1">
+                <p className="text-[0.9rem] text-[var(--text-muted)] leading-relaxed">
+                  One tweet, pinned at one moment in time.
+                </p>
+                <p className="text-[0.8rem] text-[var(--text-muted)] mt-1.5 opacity-70">
+                  Best for highlighting a single announcement or update.
+                </p>
+              </div>
+            </div>
+
+            {/* X Pro collection */}
+            <div className="bg-white/75 backdrop-blur-[16px] border border-white/90 rounded-[var(--radius-md)] p-5 sm:p-7 shadow-[var(--shadow-soft)] flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+              <div className="sm:min-w-[160px]">
+                <h3 className="text-[1.1rem] font-semibold text-[var(--text-main)]">X Pro collection</h3>
+              </div>
+              <div className="flex-1">
+                <p className="text-[0.9rem] text-[var(--text-muted)] leading-relaxed">
+                  A way to group posts inside X for monitoring or internal curation. Requires a subscription to X Pro.
+                </p>
+                <p className="text-[0.8rem] text-[var(--text-muted)] mt-1.5 opacity-70">
+                  Best for organizing posts operationally within the X ecosystem.
+                </p>
+              </div>
+            </div>
+
+            {/* Curio */}
+            <div className="bg-[var(--text-main)] rounded-[var(--radius-md)] p-5 sm:p-7 shadow-[0_8px_24px_rgba(42,40,38,0.15)] flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+              <div className="sm:min-w-[160px]">
+                <h3
+                  className="text-[1.2rem] font-medium italic text-white"
+                  style={{ fontFamily: "var(--font-serif), 'Newsreader', serif" }}
+                >
+                  Curio
+                </h3>
+              </div>
+              <div className="flex-1">
+                <p className="text-[0.9rem] text-white/85 leading-relaxed">
+                  A public, evergreen, profile-style showcase for your best tweets across themes.
+                </p>
+                <p className="text-[0.8rem] text-white/55 mt-1.5">
+                  Best for turning your best ideas into a browsable portfolio you can share anywhere.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Built for creators on X */}
         <section id="features" className="py-[60px] sm:py-[120px]">
           <div className="text-center mb-10 sm:mb-20">
@@ -286,7 +360,7 @@ export default function Home() {
           <div className="bg-white/50 border border-white/90 rounded-[24px] sm:rounded-[40px] p-6 sm:p-10 shadow-[inset_0_0_40px_rgba(255,255,255,0.8),var(--shadow-soft)] overflow-hidden">
             <div className="bg-white rounded-full px-5 py-3 inline-flex items-center gap-3 shadow-[0_4px_12px_rgba(0,0,0,0.05)] text-[0.9rem] font-medium mb-4">
               <span className="inline-block w-2 h-2 bg-green-500 rounded-full" />
-              curio.link/design-thoughts
+              curio-brown.vercel.app/designthoughts
             </div>
             <div className="bg-white/60 rounded-full px-5 py-3 inline-flex items-center gap-3 shadow-[0_4px_12px_rgba(0,0,0,0.02)] text-[0.9rem] font-medium text-[var(--text-muted)] backdrop-blur-sm ml-5 mb-4">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>
@@ -330,13 +404,15 @@ export default function Home() {
               Join thousands of writers, designers, and thinkers preserving their best work.
             </p>
             <Link
-              href="/signup"
+              href="/try"
               className="inline-flex items-center justify-center px-10 py-4 rounded-full text-[1.1rem] font-medium bg-[var(--text-main)] text-white shadow-[0_8px_16px_rgba(42,40,38,0.15)] hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(42,40,38,0.2)] hover:bg-[#1a1918] transition-all"
             >
-              Sign up free
+              Try it now!
             </Link>
           </div>
         </section>
+
+        <Footer />
       </div>
     </div>
   );
