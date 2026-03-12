@@ -10,49 +10,68 @@ Feed-based social platforms force content into chronological order. Great thread
 
 ## How It Works
 
-1. **Sign up** — claim your username and verify your X handle by pasting one of your tweets
+1. **Sign up** — claim your username with your X handle
 2. **Create collections** — named topic buckets like "Hiring Advice" or "Marketing Frameworks"
-3. **Paste your tweet URLs** — add your tweets to collections. Curio fetches and caches the embed.
-4. **Share your profile** — one link in your bio, all your best content, always accessible
+3. **Paste your tweet URLs** — add your tweets to collections. Curio fetches and renders them as rich embeds.
+4. **Drag to reorder** — arrange tweets and collections in exactly the order you want
+5. **Share your profile** — one link in your bio, all your best content, always accessible
 
 Only your own tweets can be saved — Curio verifies handle ownership at signup and enforces it on every import.
 
+## Features
+
+- **Own-tweets-only verification** — X handle verified at signup, enforced on every import
+- **Rich tweet embeds** — live Twitter widgets rendered via `twttr.widgets.createTweet()`
+- **Drag-and-drop reordering** — @dnd-kit powered reordering for tweets within collections
+- **Dynamic OG images** — auto-generated social preview cards for profiles and collections (edge runtime)
+- **Social sharing** — share on X or copy link with one click
+- **Collection URL slugs** — clean, readable URLs (`/username/hiring-advice` instead of UUIDs)
+- **Glassmorphic design** — warm glass aesthetic with DM Sans + Newsreader font pairing, animated gradient background
+- **Fully mobile responsive** — optimized layouts across all breakpoints (mobile, tablet, desktop)
+- **SEO-ready** — server-rendered public pages with Open Graph and Twitter Card meta tags
+- **Near-zero cost** — free oEmbed API, Supabase free tier, Vercel hobby plan
+
 ## Tech Stack
 
-| Layer      | Technology                | Purpose                                       |
-|------------|---------------------------|-----------------------------------------------|
-| Framework  | Next.js 16 (App Router)   | SSR for public profiles, React SPA for dashboard |
-| Language   | TypeScript                | Type safety across frontend and API routes     |
-| Styling    | Tailwind CSS 4            | Utility-first CSS                              |
-| Auth       | Supabase Auth             | Email/password authentication                  |
-| Database   | Supabase PostgreSQL       | Relational store with Row Level Security       |
-| Tweet Data | X oEmbed API (free)       | Fetch tweet embeds — no API key required       |
-| Hosting    | Vercel                    | Edge deployment with automatic CI/CD           |
+| Layer        | Technology              | Purpose                                          |
+|--------------|-------------------------|--------------------------------------------------|
+| Framework    | Next.js 16 (App Router) | SSR for public profiles, React SPA for dashboard |
+| Language     | TypeScript              | Type safety across frontend and API routes        |
+| Styling      | Tailwind CSS 4          | Utility-first CSS with responsive breakpoints     |
+| Auth         | Supabase Auth           | Email/password authentication                     |
+| Database     | Supabase PostgreSQL     | Relational store with Row Level Security          |
+| Tweet Data   | X oEmbed API (free)     | Fetch tweet embeds — no API key required          |
+| Drag & Drop  | @dnd-kit                | Sortable tweet cards with pointer sensor          |
+| Fonts        | DM Sans + Newsreader    | Sans-serif body + serif italic headings           |
+| Hosting      | Vercel                  | Edge deployment with automatic CI/CD              |
 
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── page.tsx                              # Landing page
-│   ├── layout.tsx                            # Root layout
-│   ├── globals.css                           # Global styles + CSS variables
+│   ├── page.tsx                              # Landing page (hero, how-it-works, features, CTA)
+│   ├── layout.tsx                            # Root layout (DM Sans + Newsreader fonts)
+│   ├── globals.css                           # Design tokens, animated gradient background
 │   ├── login/page.tsx                        # Login form
-│   ├── signup/page.tsx                       # Signup with X handle verification
+│   ├── signup/page.tsx                       # Signup with X handle input
 │   ├── dashboard/
 │   │   ├── layout.tsx                        # Forces dynamic rendering
 │   │   ├── page.tsx                          # Collections dashboard (CRUD)
-│   │   └── collections/[id]/page.tsx         # Collection editor (add/remove tweets)
+│   │   └── collections/[id]/page.tsx         # Collection editor (drag-and-drop, add/remove tweets)
 │   ├── [username]/
 │   │   ├── page.tsx                          # Public profile (SSR)
-│   │   └── [collection]/page.tsx             # Public collection view (SSR)
+│   │   ├── opengraph-image.tsx               # Dynamic OG image for profiles (edge)
+│   │   └── [collection]/
+│   │       ├── page.tsx                      # Public collection view (SSR)
+│   │       └── opengraph-image.tsx           # Dynamic OG image for collections (edge)
 │   └── api/
 │       ├── auth/callback/route.ts            # Supabase auth callback
 │       └── tweets/fetch/route.ts             # oEmbed fetcher + ownership check + DB caching
 ├── components/
-│   ├── TweetCard.tsx                         # Renders tweet embeds via Twitter widgets
-│   ├── CollectionCard.tsx                    # Collection preview card
-│   ├── CollectionDropdown.tsx                # Collection switcher dropdown
+│   ├── TweetCard.tsx                         # Renders live tweet embeds via Twitter widgets.js
+│   ├── CollectionCard.tsx                    # Collection preview card with hover effects
+│   ├── CollectionDropdown.tsx                # Collection switcher dropdown (nav)
 │   ├── ShareButton.tsx                       # Share on X / copy link dropdown
 │   └── LandingNav.tsx                        # Auth-aware landing page nav
 ├── lib/
@@ -60,7 +79,7 @@ src/
 │   │   ├── client.ts                         # Browser client
 │   │   ├── server.ts                         # Server client (cookies-based)
 │   │   └── middleware.ts                     # Session refresh + route protection
-│   └── utils.ts                              # Tweet URL parsing, oEmbed fetcher, handle utilities
+│   └── utils.ts                              # Tweet URL parsing, slug generation, handle utilities
 ├── types/
 │   └── index.ts                              # TypeScript interfaces
 └── middleware.ts                              # Next.js middleware entry point
@@ -167,11 +186,23 @@ Four tables with Row Level Security enabled on all:
 
 Unique constraint on `(collection_id, tweet_id)` prevents duplicates.
 
+## Design System
+
+Curio uses a warm glassmorphic aesthetic:
+
+- **Fonts**: DM Sans (body/UI) + Newsreader (italic serif headings and logo)
+- **Palette**: warm off-white base (`#fcfaf8`), dark brown text (`#2a2826`), muted brown secondary (`#787470`)
+- **Cards**: frosted glass (`bg-white/75 backdrop-blur-[24px]`) with white borders and soft shadows
+- **Nav**: floating glass pill, centered horizontally, rounded-full with backdrop blur
+- **Background**: animated radial gradient with slow breathing keyframe animation
+- **Tweet cards**: alternating mint/sky glass tints
+- **Responsive**: 3-breakpoint system (mobile-first, `sm:640px`, `lg:1024px`)
+
 ## Key Design Decisions
 
 ### Own Tweets Only + Handle Verification
 
-Curio is for showcasing **your own** body of work. During signup, users provide their X handle and prove ownership by pasting a link to one of their own tweets. The oEmbed API returns the tweet's author — we compare it to the claimed handle. Every subsequent tweet import is also checked against the stored handle.
+Curio is for showcasing **your own** body of work. During signup, users provide their X handle. Every tweet import checks authorship via oEmbed — the API returns the tweet's author, and we compare it to the stored handle.
 
 This prevents impersonation and keeps profiles authentic without requiring X OAuth.
 
@@ -179,13 +210,9 @@ This prevents impersonation and keeps profiles authentic without requiring X OAu
 
 The X API Basic tier costs $200/month. The [oEmbed endpoint](https://developer.x.com/en/docs/x-for-websites/oembed-api) is completely free and requires no authentication. Trade-off: we get rendered HTML embeds instead of structured data (no raw metrics), but the visual result is identical to embedded tweets elsewhere on the web. This brings operating costs to near-zero.
 
-### Fetch Once, Cache Forever
+### Live Tweet Rendering
 
-When a user pastes a tweet URL, we call oEmbed once and store the HTML in our database. All subsequent page loads serve from the cache. This means:
-
-- Near-zero ongoing API usage
-- Fast page loads (no external calls on render)
-- Tweets remain visible even if the original is deleted (cached HTML persists)
+Tweet embeds are rendered client-side via Twitter's `widgets.js` library (`twttr.widgets.createTweet()`). This fetches the latest tweet appearance directly from Twitter, ensuring up-to-date styling, engagement counts, and media. The oEmbed HTML stored in the database serves as a fallback reference.
 
 ### Row Level Security
 
@@ -197,13 +224,13 @@ All tables have RLS policies. Users can only modify their own data. Public profi
 |-----------------------------------|---------|------------------------------------------------|
 | `/`                               | Static  | Landing page                                   |
 | `/login`                          | Static  | Login form                                     |
-| `/signup`                         | Static  | Signup with X handle verification              |
+| `/signup`                         | Static  | Signup with X handle input                     |
 | `/dashboard`                      | Dynamic | Collections manager (auth required)            |
-| `/dashboard/collections/[id]`     | Dynamic | Collection editor (auth required)              |
-| `/[username]`                     | Dynamic | Public profile with verified X handle (SSR)    |
-| `/[username]/[collection]`        | Dynamic | Public collection view (SSR)                   |
+| `/dashboard/collections/[id]`     | Dynamic | Collection editor with drag-and-drop (auth required) |
+| `/[username]`                     | Dynamic | Public profile (SSR) + dynamic OG image        |
+| `/[username]/[collection]`        | Dynamic | Public collection view (SSR) + dynamic OG image |
 | `/api/auth/callback`              | API     | Supabase auth callback                         |
-| `/api/tweets/fetch`               | API     | Fetch, verify ownership, cache tweet via oEmbed|
+| `/api/tweets/fetch`               | API     | Fetch, verify ownership, cache tweet via oEmbed |
 
 ## Deployment
 
